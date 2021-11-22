@@ -13,7 +13,6 @@ const percentOfLowercaseLetters = 0.7;
 
 const getPercentOfSmallCharacter = (str) => str.split('').reduce((acc, character) => (alphabet.indexOf(character) === -1 ? acc : acc + 1), 0);
 
-
 fs.readFile('./text.txt', 'utf8', (err, data) => {
   if (err) {
     console.error(err);
