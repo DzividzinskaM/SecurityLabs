@@ -1,5 +1,6 @@
 const { log } = require('console');
 const fs = require('fs');
+const path = require('path');
 
 const calculateNgrams = (arr) => {
   sum = arr.reduce(
@@ -23,8 +24,8 @@ const readFile = function (file) {
   return fs.readFileSync(file).toString().split('\r\n');
 };
 
-const TRIGRAMS = calculateNgrams(readFile('./helpers/trigram.txt'));
-const BIGRAMS = calculateNgrams(readFile('./helpers/bigram.txt'));
+const BIGRAMS = calculateNgrams(readFile(path.join(__dirname$1.slice(1,__dirname$1.length), "","/helpers/bigram.txt")));
+const TRIGRAMS = calculateNgrams(readFile('trigram.txt'));
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const CIPHER = 'EFFPQLEKVTVPCPYFLMVHQLUEWCNVWFYGHYTCETHQEKLPVMSAKSPVPAPVYWMVHQLUSPQLYWLASLFVWPQLMVHQLUPLRPSQLULQESPBLWPCSVRVWFLHLWFLWPUEWFYOTCMQYSLWOYWYETHQEKLPVMSAKSPVPAPVYWHEPPLUWSGYULEMQTLPPLUGUYOLWDTVSQETHQEKLPVPVSMTLEUPQEPCYAMEWWYTYWDLUULTCYWPQLSEOLSVOHTLUYAPVWLYGDALSSVWDPQLNLCKCLRQEASPVILSLEUMQBQVMQCYAHUYKEKTCASLFPYFLMVHQLUPQLHULIVYASHEUEDUEHQBVTTPQLVWFLRYGMYVWMVFLWMLSPVTTBYUNESESADDLSPVYWCYAMEWPUCPYFVIVFLPQLOLSSEDLVWHEUPSKCPQLWAOKLUYGMQEUEMPLUSVWENLCEWFEHHTCGULXALWMCEWETCSVSPYLEMQYGPQLOMEWCYAGVWFEBECPYASLQVDQLUYUFLUGULXALWMCSPEPVSPVMSBVPQPQVSPCHLYGMVHQLUPQLWLRPOEDVMETBYUFBVTTPENLPYPQLWLRPTEKLWZYCKVPTCSTESQPBYMEHVPETCMEHVPETZMEHVPETKTMEHVPETCMEHVPETT';
@@ -434,7 +435,104 @@ const GA = () => {
 
 }
 
+const POPULATION_SIZE = 20;
+
+const freq = {
+    A: 0.08167,
+    B: 0.01492,
+    C: 0.02782,
+    D: 0.04253,
+    E: 0.12702,
+    F: 0.02228,
+    G: 0.02015,
+    H: 0.06094,
+    I: 0.06966,
+    J: 0.00153,
+    K: 0.00772,
+    L: 0.04025,
+    M: 0.02406,
+    N: 0.06749,
+    O: 0.07507,
+    P: 0.01929,
+    Q: 0.00095,
+    R: 0.05987,
+    S: 0.06327,
+    T: 0.09056,
+    U: 0.02758,
+    V: 0.00978,
+    W: 0.02360,
+    X: 0.00150,
+    Y: 0.01974,
+    Z: 0.00074
+};
+
+
+const maxFitnes = (array) => Math.max(...array.map((e) => e.fitness));
+
+const crossover = (p0, p1) => {
+  const first = [];
+  let letters = [...alphabet];
+  [...p0].forEach((_, i) => {
+    const parents = [p0[i], p1[i]];
+    letters = letters.sort((a, b) => (((parents.includes(b) ? 1 : Math.random() / 2) + freq[b]) - ((parents.includes(a) ? 1 : Math.random() / 2) + freq[a])));
+    first.push(letters.shift());
+  })
+
+  const second = [];
+  letters = [...alphabet];
+  [...p1].forEach((_, i) => {
+      const parents = [p0[p0.length-i], p1[p0s.length-i]];
+      letters = letters.sort((a, b) => (((parents.includes(b) ? -1 : Math.random()/2) + freq[b]) - ((parents.includes(a) ? -1 : Math.random()/2) + freq[a])));
+      second.unshift(letters.pop());
+  });
+
+  return [first.join(''), second.join('')];
+}
+
+const iterate = (p0) => {
+  
+  let sorted = p0.sort((a, b) =>
+      parseFloat(a.fitness) > parseFloat(b.fitness) ? 1 : -1
+  );
+
+  const newPopulation = sorted.flatMap((p, i, arr) => (i % 2 === 1 || !arr[i + 1]) ? null : crossover(p, arr[i + 1]))
+    .filter(p => p)
+    .map(p => (Math.random() < 0.5) ? mutate(p) : p);
+  
+  return [
+    ...sorted.slice(0, Math.floor(POPULATION_SIZE / 2)),
+    ...newPopulation.slice(0, Math.ceil(POPULATION_SIZE / 2))
+  ]
+}
+
+const four = () => {
+  const randomPopulation = generatePopulation();
+  let p0 = randomPopulation.map((p) => ({ p, fitness: fitness(decrypt(CIPHER, p)) }));
+  let max = { f: p0[0].fitness, i: 0 };
+  let i = 0;
+  max.f = maxFitnes(p0);
+  while (max.i + 100 > i && i < 10000) {
+    p0 = (p0);
+    if (maxFitnes(p0) > max.f) {
+      // console.log(i);
+      max.f = maxFitnes(p0);
+      max.i = i;
+    }
+
+    i++;
+  }
+  p0.forEach(p => {
+    console.log('\n\nkey ' + p);
+    console.log('decode' + decrypt(cipher, p))
+  })
+};
+
+
+
 GA();
+
+
+
 
 // console.log(BIGRAMS);
 
